@@ -3,7 +3,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 import pyreadr
-
+import pmdarima as pm
+import joblib
+import pickle
 import polars as pl
 
 from statsmodels.tsa.arima.model import ARIMA
@@ -27,24 +29,40 @@ def train_test_split(df:pl.DataFrame,year_cutoff:int):
 
 from sklearn.metrics import mean_squared_error
 
-def test_arima_group(train:pl.DataFrame,test:pl.DataFrame,x:str,y:str,group:str,diagnostics=False):
-    output_folderpath = Path("results/ARIMA/")
-    output_folderpath.mkdir(exist_ok=True,parents=True)
-    print(f"Running experiments for {group}")
-    y_train = train.select(pl.col(y)).to_numpy()
-    y_test = test.select(pl.col(y)).to_numpy()
+
+def train_arima_hyperopt(x_train:np.ndarray,y_train:np.ndarray):
+
     order = (2,1,1)
     model = ARIMA(y_train, order=order)
     results = model.fit()
+    return results,model
+
+def test_arima_group(train:pl.DataFrame,test:pl.DataFrame,x:str,y:str,group:str,diagnostics=False):
+    output_folderpath = Path("results/ARIMA/")
+    output_folderpath.mkdir(exist_ok=True,parents=True)
+    model_filepath = output_folderpath/f"{group}.pkl"
+    print(f"Running experiments for {group}")
+    y_train = train.select(pl.col(y)).to_numpy()
+    y_test = test.select(pl.col(y)).to_numpy()
+    
+    if model_filepath.exists():
+        with open(model_filepath, 'rb') as pkl:
+            model = pickle.load(pkl)
+    else:
+        model = pm.auto_arima(y_train, seasonal=True, m=12)
+        with open(model_filepath, 'wb') as pkl:
+            pickle.dump(model, pkl)
+
     if diagnostics:
-        results.plot_diagnostics()
+        model.summary()
+        model.plot_diagnostics()
         plt.savefig(output_folderpath/f"{group}_diagnostics.svg")
         plt.close()
-        print(results.summary())
-    train_rmse = np.sqrt(results.mse)
+        print(model.summary())
+    train_rmse = np.sqrt(model.oob())
     y_test_pred = 0# results.get_prediction(y_test)
     test_rmse = 0# np.sqrt(mean_squared_error(y_test,y_test_pred))
-    
+    order = model.params()
     return {"group":group,
             "params":order,
             "train_rmse":train_rmse,
