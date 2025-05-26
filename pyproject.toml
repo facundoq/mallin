@@ -1,0 +1,19 @@
+[project]
+name = "mallin"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "jupyter>=1.1.1",
+    "pandas>=2.2.3",
+    "patchworklib>=0.6.3",
+    "plotnine>=0.14.5",
+    "polars>=1.29.0",
+    "pyarrow>=20.0.0",
+    "pyreadr>=0.5.3",
+    "scikit-learn>=1.6.1",
+    "scikit-misc>=0.5.1",
+    "scipy>=1.15.3",
+    "statsmodels>=0.14.4",
+]
