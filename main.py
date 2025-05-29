@@ -15,7 +15,9 @@ output_folderpath = Path("results")
 output_folderpath.mkdir(exist_ok=True,parents=True)
 
 from sklearn.metrics import mean_squared_error
-def eval_model(model,train:ds.TimeSeries,test:ds.TimeSeries,train_covariates:ds.TimeSeries,test_covariates:ds.TimeSeries,metrics:dict[str,callable],config:model_config.ModelConfig,backtest_config:dict):
+Metric = Callable[[ds.TimeSeries,ds.TimeSeries],float]
+
+def eval_model(model,train:ds.TimeSeries,test:ds.TimeSeries,train_covariates:ds.TimeSeries,test_covariates:ds.TimeSeries,metrics:dict[str,Metric],config:model_config.ModelConfig,backtest_config:dict):
     test_pred = model.predict(len(test),**test_covariates)
     print("\t\t Backtesting...")
     train_pred = model.historical_forecasts(train,**train_covariates,**backtest_config,**config.fit_kwargs)
@@ -45,13 +47,14 @@ def plot_diagnostics(output_folderpath:Path,group:str,train:ds.TimeSeries,train_
 def get_covariates(config:model_config.ModelConfig,df:pd.DataFrame,test_start:pd.Timestamp):
     train_covariates = {}
     test_covariates = {}
-    if config.covariate:
-        covariate_cols = ["month","Snow","Evap","Tmax","Tmin"]
-        covariates = ds.TimeSeries.from_dataframe(df,value_cols=covariate_cols)
-        train_covariates,test_covariates = covariates.split_after(test_start)
-        train_covariates={"past_covariates":train_covariates}
-        test_covariates={"past_covariates":test_covariates}
-    return train_covariates, test_covariates 
+    for name,columns in [("past_covariates",config.past_covariates),("future_covariates",config.future_covariates)]:
+        if len(columns)>0:
+            covariates = ds.TimeSeries.from_dataframe(df,value_cols=columns)
+            before,after = covariates.split_after(test_start)
+            train_covariates[name]=covariates
+            test_covariates[name]=covariates
+    
+    return train_covariates,test_covariates
     
 def test_model_group(df:pl.DataFrame,test_start:pd.Timestamp,group_id:str,config:model_config.ModelConfig,backtest_config:dict,diagnostics=False):
     model=config.make()
@@ -65,7 +68,6 @@ def test_model_group(df:pl.DataFrame,test_start:pd.Timestamp,group_id:str,config
     ts = ds.TimeSeries.from_dataframe(df,value_cols="NDVI")
     train,test =ts.split_after(test_start)
     train_covariates, test_covariates = get_covariates(config,df,test_start)
-    print(train_covariates,test_covariates)
     
     if model_filepath.exists():
         model = model.__class__.load(str(model_filepath.absolute()))
@@ -123,28 +125,43 @@ def main():
     df = preprocessing.read_dataset("scaled_data.rds")
     df = preprocessing.preprocess(df)
    
-    
+    past_covariates = ["month","Snow","Evap","Tmax","Tmin"]
     # train,test = preprocessing.train_test_split(df,2023)
-    models = {
+    future_covariates = ["month","Tmax","Tmin","Snow"]
+    models = [
         model_config.AutoARIMAFactory(),
+        model_config.AutoARIMAFactory(future_covariates=future_covariates),
         model_config.AutoETSFactory(),
-        model_config.LSTMFactory(training_length=16,input_chunk_length=16),
-        model_config.LSTMFactory(training_length=24,input_chunk_length=24),
-    }
+        model_config.AutoETSFactory(future_covariates=future_covariates),
+        model_config.XGBFactory(lags=3, lags_past_covariates=3, output_chunk_length=3,past_covariates=past_covariates),
+        model_config.XGBFactory(lags=12, lags_past_covariates=12, output_chunk_length=6,past_covariates=past_covariates),
+        model_config.XGBFactory(lags=12, lags_past_covariates=12,lags_future_covariates=[0,1,2,3,4], output_chunk_length=6,past_covariates=past_covariates,future_covariates=future_covariates),
+        model_config.BlockRNNFactory(training_length=6,input_chunk_length=6),            
+        model_config.BlockRNNFactory(training_length=12,input_chunk_length=12),
+        model_config.BlockRNNFactory(training_length=12,input_chunk_length=12,hidden_dim=64),
+        model_config.BlockRNNFactory(training_length=12,input_chunk_length=12,hidden_dim=256),
+        model_config.BlockRNNFactory(training_length=12,input_chunk_length=12,past_covariates=past_covariates),
+        # model_config.VARIMAFactory(p=3,d=0,q=0,future_covariates=future_covariates),
+    ]
     test_cutoff = pd.Timestamp("2024-01-01")
     backtest_config = {
         "start":pd.Timestamp("2022-01-01"),
         "forecast_horizon":12,
         "last_points_only":True,
-        "stride" : 1
+        "stride" : 12,
     }
+    cols = ["train_rmse","test_rmse"]
     results = test_models(df,models,[],"NDVI",test_cutoff,backtest_config)
-    for model_results in results:
+    for model,model_results in zip(models,results):
         print(model_results)
-        for col in ["train_rmse","test_rmse"]:
-            v = model_results.mean().select(pl.col(col))
-            print(f"Average {col}: {v.item():.3f}")
 
+        # for col in ["train_rmse","test_rmse"]:
+        #     v = model_results.mean().select(pl.col(col))
+        #     print(f"{model.id()}: mean {col}={v.item():.3f}")
+    all_results:pl.DataFrame = pl.concat(results)
+    averages = all_results.group_by("model").mean().drop("group").sort("model")
+    print(averages)
+    averages.write_csv(output_folderpath/"results.csv")
     
 
 

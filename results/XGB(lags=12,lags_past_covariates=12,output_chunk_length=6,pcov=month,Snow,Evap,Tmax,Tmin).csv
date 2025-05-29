@@ -1,0 +1,2 @@
+group,train_mape,test_mape,train_mae,test_mae,train_rmse,test_rmse,model
+Mallin01,129.60539945444012,119.72574657627901,1.5870263636322521,0.9885281301127439,1.6364401667763189,1.0470128898949476,"XGB(lags=12,lags_past_covariates=12,output_chunk_length=6,pcov=month,Snow,Evap,Tmax,Tmin)"

@@ -1,0 +1,2 @@
+group,train_mape,test_mape,train_mae,test_mae,train_rmse,test_rmse,model
+Mallin01,111.40017609379176,101.19508105618215,1.361823945527499,0.9979588993248732,1.3618251233037815,1.1089949108685397,"BlockLSTM(icl=12,tl=12,hd=16,pcov=month,Snow,Evap,Tmax,Tmin)"
