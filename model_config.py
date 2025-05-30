@@ -6,10 +6,13 @@ from pytorch_lightning.callbacks import EarlyStopping
 from utils import LossPlotter
 
 class ModelConfig:
-    def __init__(self,future_covariates=[],past_covariates=[]):
+    def __init__(self,future_covariates=[],past_covariates=[],**model_kwargs):
         self.future_covariates=future_covariates
         self.past_covariates=past_covariates
-    
+        self.model_kwargs = model_kwargs
+    def model_kwargs_id(self):
+        def safe(s:str): return str(s).replace("[","(").replace("]",")")
+        return ",".join([f"{safe(k)}={safe(v)}" for k,v in self.model_kwargs.items()])
     def future_covariates_id(self):
         return  ",fcov="+(','.join(self.future_covariates)) if len(self.future_covariates) >0  else ""
     def past_covariates_id(self):
@@ -34,12 +37,8 @@ class ModelConfig:
 
 
 class XGBFactory(ModelConfig):
-    def __init__(self, future_covariates=[],past_covariates=[],**kwargs):
-        super().__init__(future_covariates=future_covariates,past_covariates=past_covariates)
-        self.model_kwargs = kwargs
-    def model_kwargs_id(self):
-        def safe(s:str): return str(s).replace("[","(").replace("]",")")
-        return ",".join([f"{safe(k)}={safe(v)}" for k,v in self.model_kwargs.items()])
+
+
     @property
     def id(self):
         return f"XGB({self.model_kwargs_id()}{self.covariates_id()})"
@@ -65,18 +64,19 @@ class VARIMAFactory(ModelConfig):
         return {}
         
 class AutoARIMAFactory(ModelConfig):
+        
     @property
-    def id(self): return f"AutoARIMA({self.covariates_id()})"
+    def id(self): return f"AutoARIMA({self.model_kwargs_id()}{self.covariates_id()})"
     def make(self):
-        return dsm.AutoARIMA(season_length=12)
+        return dsm.AutoARIMA(**self.model_kwargs)
     def desc(self,model):
         return {}
 
 class AutoETSFactory(ModelConfig):
     @property
-    def id(self): return f"AutoETS({self.covariates_id()})"
+    def id(self): return f"AutoETS({self.model_kwargs_id()}{self.covariates_id()})"
     def make(self):
-        return dsm.AutoETS(season_length=12)
+        return dsm.AutoETS(**self.model_kwargs)
     def desc(self,model):
         return {}        
 

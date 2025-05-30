@@ -1,2 +1,0 @@
-group,train_mape,test_mape,train_mae,test_mae,train_rmse,test_rmse,model
-Mallin01,100.43534219060805,85.06574525947157,1.228080686216376,0.6449618493962906,1.228848239707988,0.8212421364838289,"AutoETS(,fcov=month,Tmax,Tmin,Snow)"

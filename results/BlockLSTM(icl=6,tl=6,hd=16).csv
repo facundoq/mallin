@@ -1,2 +1,2 @@
-group,train_mape,test_mape,train_mae,test_mae,train_rmse,test_rmse,model
-Mallin01,108.5609832725248,106.70359204734649,1.327205590691894,1.039970162845423,1.3272582915781428,1.143685093436842,"BlockLSTM(icl=6,tl=6,hd=16)"
+group,backtest_mape,test_mape,backtest_mae,test_mae,backtest_rmse,test_rmse,model
+Mallin01,113.46987754430285,84.44037318205642,0.5717343282511573,0.944907627912921,0.5782962487176422,1.0954148629523732,"BlockLSTM(icl=6,tl=6,hd=16)"

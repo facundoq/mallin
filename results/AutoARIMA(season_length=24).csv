@@ -1,0 +1,2 @@
+group,backtest_mape,test_mape,backtest_mae,test_mae,backtest_rmse,test_rmse,model
+Mallin01,116.97248251969222,64.01659220968794,0.5863653317867852,0.7014420119540823,0.5909617337151445,0.9182808864686501,AutoARIMA(season_length=24)

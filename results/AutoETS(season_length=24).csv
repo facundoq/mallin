@@ -1,0 +1,2 @@
+group,backtest_mape,test_mape,backtest_mae,test_mae,backtest_rmse,test_rmse,model
+Mallin01,142.81779953650033,72.71645955585166,0.6155162772533687,0.537031729444345,0.757914869519884,0.9068085259949676,AutoETS(season_length=24)

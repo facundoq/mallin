@@ -1,2 +1,0 @@
-group,train_mape,test_mape,train_mae,test_mae,train_rmse,test_rmse,model
-Mallin01,100.74770523370896,107.6155668344265,1.2342192564434653,0.7868130106258975,1.2957570666666116,1.0717470785470908,"AutoARIMA(,pcov=month,Tmax,Tmin,Snow)"

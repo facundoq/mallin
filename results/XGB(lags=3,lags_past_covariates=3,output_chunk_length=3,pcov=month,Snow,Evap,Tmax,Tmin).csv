@@ -1,2 +1,2 @@
-group,train_mape,test_mape,train_mae,test_mae,train_rmse,test_rmse,model
-Mallin01,141.81402079746874,163.07158841619355,1.736033872163465,1.4003056397469038,1.7735507281155525,1.6603277726382786,"XGB(lags=3,lags_past_covariates=3,output_chunk_length=3,pcov=month,Snow,Evap,Tmax,Tmin)"
+group,backtest_mape,test_mape,backtest_mae,test_mae,backtest_rmse,test_rmse,model
+Mallin01,244.50943977325744,137.34434403697986,1.1789384582758644,1.3612830989762268,1.1826766243476785,1.5860557074652453,"XGB(lags=3,lags_past_covariates=3,output_chunk_length=3,pcov=month,Snow,Evap,Tmax,Tmin)"

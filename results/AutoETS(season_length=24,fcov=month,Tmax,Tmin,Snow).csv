@@ -1,0 +1,2 @@
+group,backtest_mape,test_mape,backtest_mae,test_mae,backtest_rmse,test_rmse,model
+Mallin01,118.64408903195721,75.15466770995761,0.4979648991277238,0.566548776859565,0.6633276656214783,0.8899792436317226,"AutoETS(season_length=24,fcov=month,Tmax,Tmin,Snow)"

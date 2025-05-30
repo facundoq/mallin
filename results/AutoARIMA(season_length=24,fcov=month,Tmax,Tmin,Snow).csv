@@ -1,0 +1,2 @@
+group,backtest_mape,test_mape,backtest_mae,test_mae,backtest_rmse,test_rmse,model
+Mallin01,149.16533496188066,89.27440076656453,0.6175564460723555,0.7020584311549218,0.8582798568866038,1.0508651645812033,"AutoARIMA(season_length=24,fcov=month,Tmax,Tmin,Snow)"

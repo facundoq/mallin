@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 
 dependencies = [
-    
     "jupyter>=1.1.1",
     "numpy>=1.2",
     "pandas>=2.2.3",
@@ -26,10 +25,8 @@ cpu = [
     "torch>=2.7.0",
     "torchvision>=0.22.0",
     "xgboost-cpu",
-    "darts>=0.35.0",
-    
+    "darts>=0.35.0",   
 ]
-
 gpu = [
     "torch>=2.7.0",
     "torchvision>=0.22.0",
