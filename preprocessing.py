@@ -32,6 +32,14 @@ def train_test_split(df:pl.DataFrame,year_cutoff:int):
     test = df.filter(~p)
     return train,test
 
+def get_mallin_timeseries_pd(df:pl.DataFrame,mallin:str):
+    # convert to pandas and resample to
+    # make the timeseries have a define frequency 
+    dfm = df.filter(pl.col("Mallin")==mallin)
+    pdf = dfm.to_pandas()
+    pdf = pdf.set_index("Dates")
+    return pdf.asfreq("SMS",method='bfill')
+
 
 if __name__ == "__main__":
     pass
